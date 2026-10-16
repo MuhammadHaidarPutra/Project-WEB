@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+
+  @@map("users")
+}
+
+model Category {
+  id    String @id @default(cuid())
+  name  String
+  slug  String @unique
+  posts Post[]
+
+  @@map("categories")
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  excerpt     String
+  content     String
+  thumbnail   String?
+  status      String    @default("DRAFT")
+  authorId    String
+  categoryId  String
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([status])
+  @@map("posts")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  advantages  String?
+  process     String?
+  faq         String?
+  image       String?
+  icon        String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("services")
+}
+
+model Project {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  category    String
+  location    String
+  year        String
+  area        String?
+  description String
+  thumbnail   String?
+  status      String         @default("PUBLISHED")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  images      ProjectImage[]
+
+  @@map("projects")
+}
+
+model ProjectImage {
+  id        String  @id @default(cuid())
+  projectId String
+  imageUrl  String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("project_images")
+}
+
+model Consultation {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  service   String
+  message   String
+  status    String   @default("NEW")
+  createdAt DateTime @default(now())
+
+  @@map("consultations")
+}
